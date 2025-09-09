@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CareerPath — Smart Career Guidance for Students</title>
+  <meta name="description" content="Discover careers, skills, salaries, and roadmaps. Take a quick quiz and get tailored suggestions.">
+  <style>
+    :root{
+      --bg: #0f172a;           /* slate-900 */
+      --card: #111827;        /* gray-900 */
+      --muted: #9ca3af;       /* gray-400 */
+      --text: #e5e7eb;        /* gray-200 */
+      --accent: #22d3ee;      /* cyan-400 */
+      --accent-2:#a78bfa;     /* violet-400 */
+      --success:#34d399;      /* emerald-400 */
+      --warn:#f59e0b;         /* amber-500 */
+      --danger:#f43f5e;       /* rose-500 */
+      --ring: rgba(34,211,238,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;background:radial-gradient(1200px 800px at 80% -10%,rgba(167,139,250,.15),transparent),radial-gradient(900px 600px at -10% 10%,rgba(34,211,238,.12),transparent),var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1100px;margin-inline:auto;padding:24px}
+    header{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(15,23,42,.9), rgba(15,23,42,.55) 60%, transparent);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 24px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px}
+    .brand .logo{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:#0b1220;font-weight:900;}
+    .navlinks{display:flex;gap:14px;flex-wrap:wrap}
+    .navlinks a{opacity:.9;padding:8px 10px;border-radius:10px}
+    .navlinks a:hover{background:#0b1220}
+    .cta{display:flex;gap:10px;align-items:center}
+    .btn{border:1px solid rgba(255,255,255,.12);background:#0b1220;padding:10px 14px;border-radius:14px;color:var(--text);font-weight:600}
+    .btn:hover{border-color:rgba(255,255,255,.25)}
+    .btn.acc{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0b1220;border:none}
+
+    /* Hero */
+    .hero{padding:54px 24px 28px}
+    .hero-inner{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center}
+    .title{font-size:clamp(28px,4vw,44px);line-height:1.1;margin:0 0 12px;font-weight:900}
+    .subtitle{font-size:clamp(14px,2.3vw,18px);color:var(--muted);max-width:650px}
+    .hero-card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);padding:18px;border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+    .kpi{background:#0b1220;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;text-align:center}
+    .kpi .num{font-size:20px;font-weight:800}
+    .kpi .lbl{font-size:12px;color:var(--muted)}
+
+    /* Filters & grid */
+    .section{padding:30px 0}
+    .section h2{margin:0 0 12px;font-size:26px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);cursor:pointer}
+    .chip.active{background:linear-gradient(135deg,rgba(34,211,238,.15),rgba(167,139,250,.15));border-color:var(--ring)}
+    .search{flex:1;min-width:220px;display:flex}
+    .search input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0b1220;color:var(--text)}
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+    .card .img{height:140px;background:radial-gradient(500px 220px at 80% -30%,rgba(34,211,238,.3),transparent),
+                          radial-gradient(400px 200px at -10% 10%,rgba(167,139,250,.35),transparent),
+                          #0b1220}
+    .card .body{padding:16px;display:flex;flex-direction:column;gap:10px}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#0b1220;border:1px solid rgba(255,255,255,.1);font-size:12px}
+    .chips{display:flex;gap:6px;flex-wrap:wrap}
+    .muted{color:var(--muted);font-size:14px}
+    .actions{margin-top:auto;display:flex;gap:10px}
+    .btn.sm{padding:8px 10px;border-radius:10px;font-size:13px}
+
+    /* Roadmap modal */
+    dialog{border:none;border-radius:18px;max-width:720px;width:96%;background:#0b1220;color:var(--text);padding:0;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+    dialog::backdrop{background:rgba(0,0,0,.6)}
+    .modal-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding:14px 18px}
+    .modal-body{padding:18px}
+    .roadmap{display:grid;gap:10px}
+    .step{border:1px dashed rgba(255,255,255,.18);padding:12px;border-radius:12px}
+    .step h4{margin:0 0 6px}
+
+    /* Quiz */
+    .quiz{display:grid;gap:10px;margin-top:14px}
+    .q{border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border-radius:14px;padding:12px}
+    .q h4{margin:0 0 8px}
+    .result{margin-top:10px;padding:12px;border-radius:12px;background:linear-gradient(90deg,rgba(34,211,238,.12),rgba(167,139,250,.12));border:1px solid var(--ring)}
+
+    /* Footer */
+    footer{border-top:1px solid rgba(255,255,255,.08);margin-top:24px;padding:20px;color:var(--muted);text-align:center}
+
+    /* Responsive */
+    @media (max-width:1024px){
+      .grid{grid-template-columns:repeat(2,1fr)}
+      .hero-inner{grid-template-columns:1fr}
+    }
+    @media (max-width:640px){
+      .grid{grid-template-columns:1fr}
+      .kpis{grid-template-columns:repeat(2,1fr)}
+      .navlinks{display:none}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav container">
+      <div class="brand"><div class="logo">CP</div>CareerPath</div>
+      <nav class="navlinks">
+        <a href="#explore">Explore</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#resources">Resources</a>
+        <a href="#about">About</a>
+      </nav>
+      <div class="cta">
+        <button id="saveBtn" class="btn sm">Save prefs</button>
+        <button id="resetBtn" class="btn sm">Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-inner">
+        <div>
+          <h1 class="title">Smart Career Guidance for Students</h1>
+          <p class="subtitle">Discover career paths based on your interests. Filter roles, compare salaries & skills, open step‑by‑step roadmaps, and take a quick quiz for tailored suggestions.</p>
+          <div class="controls" style="margin-top:14px">
+            <a href="#explore" class="btn acc">Start Exploring</a>
+            <a href="#quiz" class="btn">Take Quiz</a>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="num" id="kpiRoles">6+</div><div class="lbl">Popular Roles</div></div>
+            <div class="kpi"><div class="num">₹3.5L–₹15L</div><div class="lbl">Typical Fresher CTC</div></div>
+            <div class="kpi"><div class="num">2025</div><div class="lbl">Market‑ready</div></div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <strong>Tip:</strong> Use the filters below to match your interests. Click <em>Roadmap</em> on any role to view step‑by‑step learning.
+          <div class="quiz" style="margin-top:10px">
+            <div class="q">
+              <h4>Quick Pick</h4>
+              <div class="chips">
+                <button class="chip" data-pick="web">Web Dev</button>
+                <button class="chip" data-pick="ai">AI/ML</button>
+                <button class="chip" data-pick="data">Data Science</button>
+                <button class="chip" data-pick="security">Cybersecurity</button>
+                <button class="chip" data-pick="cloud">Cloud/DevOps</button>
+                <button class="chip" data-pick="mobile">Mobile Apps</button>
+              </div>
+            </div>
+            <div class="q">
+              <h4>Search roles</h4>
+              <div class="search"><input id="search" placeholder="e.g., python, react, security, analytics" /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="explore" class="section">
+      <h2>Explore Careers</h2>
+      <div class="controls" style="margin-bottom:8px">
+        <div class="chips" id="filterChips"></div>
+      </div>
+      <div id="cards" class="grid"></div>
+    </section>
+
+    <section id="quiz" class="section">
+      <h2>Find Your Fit — 60‑second Quiz</h2>
+      <div class="quiz">
+        <div class="q">
+          <h4>1) Aapko kaunsa kaam zyada pasand hai?</h4>
+          <label><input type="radio" name="q1" value="web"> Websites/App UI banana</label><br>
+          <label><input type="radio" name="q1" value="data"> Data analyze karke insights nikalna</label><br>
+          <label><input type="radio" name="q1" value="ai"> Smart models/automation banana</label><br>
+          <label><input type="radio" name="q1" value="security"> Systems ko secure rakhna</label><br>
+          <label><input type="radio" name="q1" value="cloud"> Infra/CI‑CD manage karna</label>
+        </div>
+        <div class="q">
+          <h4>2) Tumhari strong skill?</h4>
+          <label><input type="radio" name="q2" value="web"> UI/UX & JavaScript</label><br>
+          <label><input type="radio" name="q2" value="data"> Math/Statistics</label><br>
+          <label><input type="radio" name="q2" value="ai"> Python & Algorithms</label><br>
+          <label><input type="radio" name="q2" value="security"> Networking/Linux</label><br>
+          <label><input type="radio" name="q2" value="mobile"> Mobile/Flutter</label>
+        </div>
+        <div class="q">
+          <h4>3) Future plan?</h4>
+          <label><input type="radio" name="q3" value="web"> Freelancing & Product Building</label><br>
+          <label><input type="radio" name="q3" value="ai"> Research/AI Startups</label><br>
+          <label><input type="radio" name="q3" value="data"> Analytics/BI</label><br>
+          <label><input type="radio" name="q3" value="cloud"> DevOps/Cloud Architect</label><br>
+          <label><input type="radio" name="q3" value="security"> Security Analyst</label>
+        </div>
+        <button id="quizBtn" class="btn acc" style="width:max-content">Show Suggestion</button>
+        <div id="quizResult" class="result" style="display:none"></div>
+      </div>
+    </section>
+
+    <section id="resources" class="section">
+      <h2>Starter Resources</h2>
+      <div class="grid">
+        <div class="card"><div class="img"></div><div class="body"><h3>Learning Plan Template</h3><p class="muted">4‑week plan with daily goals, checkpoints, and project ideas.</p><div class="actions"><button class="btn sm" onclick="downloadPlan()">Download .PDF</button></div></div></div>
+        <div class="card"><div class="img"></div><div class="body"><h3>Resume Checklist</h3><p class="muted">ATS‑friendly pointers with sample bullets for tech roles.</p><div class="actions"><button class="btn sm" onclick="downloadResume()">Download .DOCX</button></div></div></div>
+        <div class="card"><div class="img"></div><div class="body"><h3>Interview Prep</h3><p class="muted">DSA roadmap + behavioral questions. Perfect for freshers.</p><div class="actions"><button class="btn sm" onclick="alert('Coming soon — add your own content!')">Open</button></div></div></div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <h2>About CareerPath</h2>
+      <p class="muted">A lightweight, single‑file website designed for students in India. Customize the data below to match colleges, certifications, or cities. All preferences are saved locally on your device.</p>
+    </section>
+  </main>
+
+  <footer>
+    Built with ❤️ for students • Edit the code to add more roles • © 2025 CareerPath
+  </footer>
+
+  <!-- Roadmap Modal -->
+  <dialog id="roadmapModal">
+    <div class="modal-head">
+      <h3 id="rmTitle">Roadmap</h3>
+      <button class="btn sm" onclick="closeRoadmap()">Close</button>
+    </div>
+    <div class="modal-body">
+      <div id="rmContent" class="roadmap"></div>
+    </div>
+  </dialog>
+
+  <script>
+    // --- Data ---
+    const careers = [
+      {
+        id:'web',
+        title:'Full‑Stack Web Developer',
+        salary:'₹3.5L – ₹10L',
+        scope:'High (Jobs + Freelancing)',
+        skills:['HTML','CSS','JavaScript','React','Node.js','MongoDB'],
+        tags:['frontend','backend','freelance','javascript','react','node'],
+        roadmap:[
+          {h:'Month 1: Web Basics', p:['HTML5/CSS3 responsive layout','JavaScript fundamentals','Build 2 pages: Portfolio + Landing']},
+          {h:'Month 2: Frontend', p:['React + Hooks','State management basics','Component patterns','Project: Todo + Auth']},
+          {h:'Month 3: Backend', p:['Node + Express','REST APIs & JWT','MongoDB/PostgreSQL basics','Project: CRUD API']},
+          {h:'Month 4: Full‑Stack', p:['Deploy: Vercel/Render','Auth + Role based','Capstone: Ecommerce/Blog']},
+        ],
+        action:'https://developer.mozilla.org/en-US/docs/Learn'
+      },
+      {
+        id:'ai',
+        title:'AI / Machine Learning Engineer',
+        salary:'₹5L – ₹12L',
+        scope:'Very High',
+        skills:['Python','NumPy','Pandas','Scikit‑learn','TensorFlow/PyTorch','MLOps basics'],
+        tags:['python','ml','ai','deeplearning','automation'],
+        roadmap:[
+          {h:'Month 1: Python & Math', p:['Python + Jupyter','Linear algebra, probability','Pandas/NumPy practice']},
+          {h:'Month 2: ML Core', p:['Supervised/Unsupervised','Model evaluation & bias','Project: churn prediction']},
+          {h:'Month 3: Deep Learning', p:['NN basics','CNN/RNN intro','Project: image/text mini app']},
+          {h:'Month 4: MLOps & Deploy', p:['Model serving (FastAPI)','Experiment tracking','Deploy on cloud free tier']},
+        ]
+      },
+      {
+        id:'data',
+        title:'Data Scientist / Analyst',
+        salary:'₹6L – ₹15L',
+        scope:'Very High',
+        skills:['Python/R','SQL','Data Viz','Statistics','ML basics','Dashboards'],
+        tags:['analytics','sql','tableau','powerbi','python','statistics'],
+        roadmap:[
+          {h:'Month 1: Data Foundations', p:['SQL CRUD & joins','EDA with pandas','Business metrics']},
+          {h:'Month 2: Visualization', p:['Matplotlib/Plotly','Dashboards (Power BI/Tableau)','Storytelling']},
+          {h:'Month 3: ML for DS', p:['Regression/Classification','Cross‑validation','Project: sales forecast']},
+          {h:'Month 4: Portfolio', p:['Create 3 case studies','Kaggle participation','Deploy dashboards']},
+        ]
+      },
+      {
+        id:'security',
+        title:'Cybersecurity Analyst',
+        salary:'₹4L – ₹10L',
+        scope:'High',
+        skills:['Networking','Linux','OWASP','SIEM','Threat modeling','VAPT basics'],
+        tags:['security','network','linux','soc','blue team','bug bounty'],
+        roadmap:[
+          {h:'Month 1: Foundations', p:['Networking (OSI/TCP)','Linux essentials','Scripting (bash/python)']},
+          {h:'Month 2: Web Security', p:['OWASP Top 10','Burp Suite basics','Project: lab practice']},
+          {h:'Month 3: Monitoring', p:['Log analysis','SIEM hands‑on','Incident response 101']},
+          {h:'Month 4: Certs/Portfolio', p:['TryHackMe/HTB paths','Mini write‑ups','(Optional) Security+']},
+        ]
+      },
+      {
+        id:'cloud',
+        title:'Cloud & DevOps Engineer',
+        salary:'₹5L – ₹13L',
+        scope:'High',
+        skills:['Linux','Git','Docker','CI/CD','AWS/Azure/GCP','Terraform basics'],
+        tags:['devops','cloud','docker','kubernetes','pipelines'],
+        roadmap:[
+          {h:'Month 1: OS & Git', p:['Linux admin','Git/GitHub workflows','SSH & servers']},
+          {h:'Month 2: Containers', p:['Docker images/compose','Kubernetes intro','Project: containerize app']},
+          {h:'Month 3: CI/CD', p:['GitHub Actions','Testing & pipelines','Infra as Code (Terraform)']},
+          {h:'Month 4: Cloud', p:['AWS free tier','Setup VPC/EC2/S3','Deploy with IaC']},
+        ]
+      },
+      {
+        id:'mobile',
+        title:'Mobile App Developer (Flutter)',
+        salary:'₹4L – ₹10L',
+        scope:'High',
+        skills:['Dart','Flutter','State mgmt','APIs','Firebase','Store publishing'],
+        tags:['android','ios','flutter','mobile','dart'],
+        roadmap:[
+          {h:'Month 1: Dart & Widgets', p:['Dart basics','Layouts & navigation','UI clones']},
+          {h:'Month 2: State & APIs', p:['Provider/Bloc','REST/GraphQL','Project: notes app']},
+          {h:'Month 3: Backend', p:['Auth + DB (Firebase)','Push notifications','In‑app payments (demo)']},
+          {h:'Month 4: Publish', p:['Play Store prep','Testing/CI','Marketing basics']},
+        ]
+      },
+    ];
+
+    const interests = [
+      {id:'frontend', label:'Frontend/UI'},
+      {id:'backend', label:'Backend/APIs'},
+      {id:'python', label:'Python'},
+      {id:'security', label:'Security'},
+      {id:'analytics', label:'Analytics/BI'},
+      {id:'cloud', label:'Cloud/DevOps'},
+      {id:'mobile', label:'Mobile Apps'},
+      {id:'freelance', label:'Freelancing'},
+    ];
+
+    // --- DOM helpers ---
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+
+    // Build chips
+    const chipWrap = document.getElementById('filterChips');
+    interests.forEach(x=>{
+      const b = document.createElement('button');
+      b.className='chip'; b.textContent=x.label; b.dataset.id=x.id; b.onclick=()=>{ b.classList.toggle('active'); renderCards(); savePrefs(); };
+      chipWrap.appendChild(b);
+    });
+
+    // Search + quick picks
+    document.getElementById('search').addEventListener('input', renderCards);
+    $$('.chip[data-pick]').forEach(c=>c.addEventListener('click', ()=>{
+      const id = c.dataset.pick;
+      document.getElementById('search').value='';
+      // activate relevant chip if exists
+      const chip = $(`#filterChips .chip[data-id="${id}"]`);
+      if(chip){ chip.classList.add('active'); }
+      renderCards();
+      location.hash = '#explore';
+    }));
+
+    function renderCards(){
+      const search = document.getElementById('search').value.trim().toLowerCase();
+      const activeTags = $$('#filterChips .chip.active').map(x=>x.dataset.id);
+      const grid = document.getElementById('cards');
+      grid.innerHTML='';
+      const filtered = careers.filter(c=>{
+        const inSearch = !search || (c.title.toLowerCase().includes(search) || c.skills.join(' ').toLowerCase().includes(search) || c.tags.join(' ').toLowerCase().includes(search));
+        const inTags = activeTags.length===0 || activeTags.some(t=>c.tags.includes(t));
+        return inSearch && inTags;
+      });
+      // KPI
+      document.getElementById('kpiRoles').textContent = filtered.length + '+';
+
+      filtered.forEach(c=>{
+        const div = document.createElement('div');
+        div.className='card';
+        div.innerHTML = `
+          <div class="img"></div>
+          <div class="body">
+            <div class="badge">${c.scope}</div>
+            <h3 style="margin:6px 0">${c.title}</h3>
+            <div class="muted">Fresher CTC: <strong>${c.salary}</strong></div>
+            <div class="chips">${c.skills.slice(0,6).map(s=>`<span class='chip'>${s}</span>`).join('')}</div>
+            <div class="actions">
+              <button class="btn sm" onclick="openRoadmap('${c.id}')">Roadmap</button>
+              <button class="btn sm" onclick="copySkills('${c.skills.join(', ')}')">Copy Skills</button>
+            </div>
+          </div>`;
+        grid.appendChild(div);
+      });
+
+      if(filtered.length===0){
+        grid.innerHTML = `<div class="q">No results. Try clearing filters.</div>`;
+      }
+    }
+
+    // Roadmap modal
+    function openRoadmap(id){
+      const c = careers.find(x=>x.id===id); if(!c) return;
+      document.getElementById('rmTitle').textContent = c.title + ' — 4‑Month Roadmap';
+      const wrap = document.getElementById('rmContent');
+      wrap.innerHTML = c.roadmap.map(st => `
+        <div class='step'>
+          <h4>${st.h}</h4>
+          <ul>${st.p.map(x=>`<li>${x}</li>`).join('')}</ul>
+        </div>`).join('');
+      document.getElementById('roadmapModal').showModal();
+    }
+    function closeRoadmap(){ document.getElementById('roadmapModal').close(); }
+
+    // Copy helper
+    function copySkills(text){ navigator.clipboard.writeText(text); alert('Skills copied to clipboard!'); }
+
+    // Quiz logic
+    document.getElementById('quizBtn').addEventListener('click', ()=>{
+      const vals = ['q1','q2','q3'].map(n=>{
+        const el = document.querySelector(`input[name="${n}"]:checked`); return el?el.value:null;
+      }).filter(Boolean);
+      if(vals.length===0){ showResult('Please answer at least one question.'); return; }
+      const score = vals.reduce((m,v)=>{ m[v]=(m[v]||0)+1; return m; },{});
+      const top = Object.entries(score).sort((a,b)=>b[1]-a[1])[0][0];
+      const map = {web:'Full‑Stack Web Developer', ai:'AI / Machine Learning Engineer', data:'Data Scientist / Analyst', security:'Cybersecurity Analyst', cloud:'Cloud & DevOps Engineer', mobile:'Mobile App Developer (Flutter)'};
+      const pick = careers.find(c=>c.id===top);
+      showResult(`Suggested path: <strong>${map[top]}</strong><br>Why: matches your interests & strengths. <a href="#explore" onclick="highlight('${pick?.id}')">View role</a>`);
+      // auto‑activate chip
+      const chip = document.querySelector(`#filterChips .chip[data-id='${top}']`);
+      if(chip){ chip.classList.add('active'); renderCards(); }
+      savePrefs();
+    });
+    function showResult(html){ const el = document.getElementById('quizResult'); el.innerHTML = html; el.style.display='block'; }
+
+    function highlight(id){
+      setTimeout(()=>{
+        const grid = document.getElementById('cards');
+        const card = Array.from(grid.children).find(c=>c.querySelector('.actions button')?.getAttribute('onclick')?.includes(`'${id}'`));
+        if(card){ card.style.outline=`2px solid ${getComputedStyle(document.documentElement).getPropertyValue('--accent')}`; card.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>card.style.outline='none', 1800); }
+      }, 0);
+    }
+
+    // Resources (fake downloads)
+    function downloadPlan(){
+      const blob = new Blob([`CareerPath — 4‑Week Learning Plan\n\nWeek 1: Foundations\nWeek 2: Projects\nWeek 3: Practice\nWeek 4: Showcase`], {type:'text/plain'});
+      triggerDownload(blob,'CareerPath_LearningPlan.txt');
+    }
+    function downloadResume(){
+      const blob = new Blob([`Resume Checklist\n\n→ Contact & Links\n→ Projects with impact\n→ Skills (tools + depth)\n→ Education & relevant certs\n→ Achievements`], {type:'text/plain'});
+      triggerDownload(blob,'CareerPath_Resume_Checklist.txt');
+    }
+    function triggerDownload(blob, name){ const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url); }
+
+    // Save/Load preferences
+    const PREF_KEY = 'careerpath_prefs_v1';
+    function savePrefs(){
+      const prefs = {
+        search: document.getElementById('search').value,
+        tags: $$('#filterChips .chip.active').map(x=>x.dataset.id),
+      };
+      localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
+    }
+    function loadPrefs(){
+      try{
+        const p = JSON.parse(localStorage.getItem(PREF_KEY)||'{}');
+        if(p.search) document.getElementById('search').value = p.search;
+        if(p.tags){ p.tags.forEach(id=>{ const chip = document.querySelector(`#filterChips .chip[data-id='${id}']`); if(chip) chip.classList.add('active'); }); }
+      }catch{}
+    }
+    document.getElementById('saveBtn').onclick = savePrefs;
+    document.getElementById('resetBtn').onclick = ()=>{ localStorage.removeItem(PREF_KEY); $$('#filterChips .chip').forEach(c=>c.classList.remove('active')); document.getElementById('search').value=''; renderCards(); alert('Preferences cleared.'); };
+
+    // Init
+    loadPrefs();
+    renderCards();
+  </script>
+</body>
+</html>
